@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Unity Community Portal - Keyholder Dashboard</title>
+  <link rel="stylesheet" href="./src/style.css">
+  <style>
+    body > :not(#app) {
+      display: none !important;
+    }
+  </style>
+  
+  <style>
+    :root {
+      --glow-color: rgba(34, 197, 94, 0.25);
+    }
+
+    body {
+      background: linear-gradient(135deg, #f8fafc 0%, #edf2f7 50%, #e2e8f0 100%);
+      background-attachment: fixed;
+    }
+
+    /* Custom Glassmorphism Utility Effects */
+    .glass-panel {
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.6);
+      box-shadow: 0 8px 32px 0 rgba(15, 23, 42, 0.05);
+    }
+
+    .glass-header {
+      background: rgba(255, 255, 255, 0.9);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-bottom: 1px solid rgba(226, 232, 240, 0.8);
+    }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: rgba(241, 245, 249, 0.8);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8;
+    }
+
+    /* Card Micro-interactions & Glow Highlights */
+    .hover-glow {
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .hover-glow:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 12px 24px -6px rgba(15, 23, 42, 0.12), 0 0 15px var(--glow-color);
+    }
+
+    /* Gradient Text & Badges */
+    .gradient-text {
+      background: linear-gradient(135deg, #15803d 0%, #16a34a 50%, #0d9488 100%);
+      background-clip: text;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .gradient-badge-amber {
+      background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+      border: 1px solid #fcd34d;
+    }
+
+    .gradient-btn-brand {
+      background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
+      box-shadow: 0 4px 14px 0 rgba(22, 163, 74, 0.35);
+      transition: all 0.25s ease;
+    }
+    .gradient-btn-brand:hover {
+      background: linear-gradient(135deg, #15803d 0%, #14532d 100%);
+      box-shadow: 0 6px 20px 0 rgba(22, 163, 74, 0.45);
+    }
+
+    /* Modal Smooth Animations */
+    .modal-backdrop {
+      transition: opacity 0.3s ease-out;
+    }
+    .modal-box {
+      animation: modalSlideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    @keyframes modalSlideUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px) scale(0.97);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    /* Dynamic Row Fade Animation */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .animate-fade-in {
+      animation: fadeIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    /* Custom Table Row Hover & Ripple Effect */
+    .member-row {
+      transition: background-color 0.2s ease, transform 0.15s ease;
+    }
+    .member-row:hover {
+      background-color: rgba(240, 253, 244, 0.7) !important;
+    }
+  </style>
+</head>
+<body class="text-slate-800 font-sans antialiased min-h-screen flex flex-col">
+  <div id="app"></div>
+  <script type="module" src="./src/main.js"></script>
+
+  <header class="glass-header sticky top-0 z-30 shadow-sm">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      
+      <!-- Brand Logo & Title -->
+      <div class="flex items-center space-x-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-brand-500 to-brand-700 flex items-center justify-center text-white shadow-md shadow-brand-500/30">
+          <i class="fa-solid font-bold fa-users-rectangle text-lg"></i>
+        </div>
+        <div>
+          <div class="flex items-center space-x-2">
+            <h1 class="text-base font-bold text-slate-900 leading-none">Unity Community Portal</h1>
+            <span class="bg-brand-100 text-brand-800 text-xs font-bold px-2.5 py-0.5 rounded-full border border-brand-200 shadow-2xs">
+              Chama #402
+            </span>
+          </div>
+          <p class="text-xs text-slate-500 mt-0.5">Keyholder & Official Administrative Portal</p>
+        </div>
+      </div>
+
+      <!-- Right Header Tools & Profile -->
+      <div class="flex items-center space-x-3">
+        <!-- Role Badge -->
+        <span class="hidden sm:inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-semibold gradient-badge-amber text-amber-900 shadow-2xs">
+          <i class="fa-solid fa-key text-amber-700 mr-1.5 text-2xs"></i> Keyholder Admin
+        </span>
+
+        <!-- Notifications Indicator -->
+        <button onclick="showToast('No new unread alerts')" class="relative p-2 text-slate-500 hover:text-slate-800 hover:bg-slate-100/80 rounded-xl transition-all duration-200" title="Notifications">
+          <i class="fa-regular fa-bell text-lg"></i>
+          <span class="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-emerald-500 rounded-full ring-2 ring-white animate-pulse"></span>
+        </button>
+
+        <!-- User Profile Pill -->
+        <div class="flex items-center space-x-2 pl-2 border-l border-slate-200">
+          <div class="w-8 h-8 rounded-full bg-slate-900 text-white flex items-center justify-center text-xs font-bold ring-2 ring-brand-500/40 shadow-sm">
+            JM
+          </div>
+          <div class="hidden md:block text-left">
+            <p class="text-xs font-semibold text-slate-800 leading-tight">John & Mary M.</p>
+            <p class="text-3xs text-slate-500 font-medium">Group Treasurer</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </header>
+
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+
+    <!-- Overview Metrics Grid (4 Cards) -->
+    <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      
+      <!-- Treasury Vault Card -->
+      <div class="glass-panel p-5 rounded-2xl border border-white/60 shadow-sm hover-glow relative overflow-hidden">
+        <div class="flex items-center justify-between">
+          <p class="text-xs font-bold text-slate-500 uppercase tracking-wider">Treasury Vault</p>
+          <div class="w-9 h-9 rounded-xl bg-emerald-100/80 text-emerald-700 flex items-center justify-center shadow-2xs">
+            <i class="fa-solid fa-vault"></i>
+          </div>
+        </div>
+        <div class="mt-3 flex items-baseline justify-between">
+          <h2 class="text-2xl font-black text-slate-900 tracking-tight">KES 450,000</h2>
+        </div>
+        <div class="mt-2 flex items-center text-xs text-emerald-600 font-medium">
+          <i class="fa-solid fa-arrow-trend-up mr-1"></i>
+          <span class="font-bold">+12.5%</span>
+          <span class="text-slate-400 ml-1">vs last cycle</span>
+        </div>
+        <div class="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-emerald-400 to-emerald-600"></div>
+      </div>
+
+      <!-- Active Loans Card -->
+      <div class="glass-panel p-5 rounded-2xl border border-white/60 shadow-sm hover-glow relative overflow-hidden" style="--glow-color: rgba(59, 130, 246, 0.25);">
+        <div class="flex items-center justify-between">
+          <p class="text-xs font-bold text-slate-500 uppercase tracking-wider">Active Loans</p>
+          <div class="w-9 h-9 rounded-xl bg-blue-100/80 text-blue-700 flex items-center justify-center shadow-2xs">
+            <i class="fa-solid fa-hand-holding-dollar"></i>
+          </div>
+        </div>
+        <div class="mt-3 flex items-baseline justify-between">
+          <h2 class="text-2xl font-black text-slate-900 tracking-tight">KES 120,000</h2>
+        </div>
+        <div class="mt-2 flex items-center text-xs text-slate-500">
+          <span class="font-bold text-slate-700">6 Members</span>
+          <span class="mx-1.5">•</span>
+          <span class="text-emerald-600 font-semibold">KES 6,000 Interest</span>
+        </div>
+        <div class="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-400 to-blue-600"></div>
+      </div>
+
+      <!-- Pending Collections Card -->
+      <div class="glass-panel p-5 rounded-2xl border border-white/60 shadow-sm hover-glow relative overflow-hidden" style="--glow-color: rgba(245, 158, 11, 0.25);">
+        <div class="flex items-center justify-between">
+          <p class="text-xs font-bold text-slate-500 uppercase tracking-wider">Pending Collections</p>
+          <div class="w-9 h-9 rounded-xl bg-amber-100/80 text-amber-700 flex items-center justify-center shadow-2xs">
+            <i class="fa-solid fa-triangle-exclamation"></i>
+          </div>
+        </div>
+        <div class="mt-3 flex items-baseline justify-between">
+          <h2 class="text-2xl font-black text-amber-600 tracking-tight">KES 15,000</h2>
+        </div>
+        <div class="mt-2 flex items-center text-xs text-amber-700 font-medium">
+          <i class="fa-solid fa-clock mr-1"></i>
+          <span>3 Members outstanding for March</span>
+        </div>
+        <div class="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-amber-400 to-amber-600"></div>
+      </div>
+
+      <!-- Next Meeting Schedule Card -->
+      <div class="glass-panel p-5 rounded-2xl border border-white/60 shadow-sm hover-glow relative overflow-hidden" style="--glow-color: rgba(168, 85, 247, 0.25);">
+        <div class="flex items-center justify-between">
+          <p class="text-xs font-bold text-slate-500 uppercase tracking-wider">Next Meeting</p>
+          <div class="w-9 h-9 rounded-xl bg-purple-100/80 text-purple-700 flex items-center justify-center shadow-2xs">
+            <i class="fa-solid fa-calendar-day"></i>
+          </div>
+        </div>
+        <div class="mt-3 flex items-baseline justify-between">
+          <h2 class="text-xl font-black text-slate-900 tracking-tight">Sat, 2:00 PM</h2>
+        </div>
+        <div class="mt-2 flex items-center text-xs text-slate-500">
+          <i class="fa-solid fa-location-dot mr-1 text-purple-500"></i>
+          <span class="font-medium">Community Hall / St. Peter's</span>
+        </div>
+        <div class="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-purple-400 to-purple-600"></div>
+      </div>
+
+    </section>
+
+    <section class="glass-panel p-4 rounded-2xl border border-white/80 shadow-sm">
+      <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+        <div>
+          <h3 class="text-xs font-extrabold uppercase tracking-wider text-slate-600">Keyholder Quick Actions</h3>
+          <p class="text-xs text-slate-500">Frequently used administrative tasks for meeting days</p>
+        </div>
+        
+        <div class="grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-2.5 w-full sm:w-auto">
+          <button onclick="openModal('recordPaymentModal')" class="gradient-btn-brand inline-flex items-center justify-center px-4 py-2 rounded-xl text-white text-xs font-bold transition-all active:scale-95">
+            <i class="fa-solid fa-plus mr-1.5"></i> Record Payment
+          </button>
+          
+          <button onclick="openModal('takeAttendanceModal')" class="inline-flex items-center justify-center px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold shadow-md shadow-slate-900/10 transition-all active:scale-95">
+            <i class="fa-solid fa-clipboard-user mr-1.5"></i> Take Attendance
+          </button>
+          
+          <button onclick="showToast('Loan Issuance Modal Opened')" class="inline-flex items-center justify-center px-4 py-2 rounded-xl bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 hover:border-slate-300 text-xs font-bold shadow-2xs transition-all active:scale-95">
+            <i class="fa-solid fa-file-signature mr-1.5 text-blue-600"></i> Issue Loan
+          </button>
+          
+          <button onclick="openModal('sendSmsModal')" class="inline-flex items-center justify-center px-4 py-2 rounded-xl bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 hover:border-slate-300 text-xs font-bold shadow-2xs transition-all active:scale-95">
+            <i class="fa-solid fa-paper-plane mr-1.5 text-amber-600"></i> Group SMS
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+      <!-- Left Column: Member Management Table -->
+      <div class="lg:col-span-8 space-y-4">
+        <div class="glass-panel rounded-2xl border border-white/80 shadow-sm overflow-hidden">
+          
+          <!-- Table Header Controls -->
+          <div class="p-4 sm:p-5 border-b border-slate-200/80 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white/40">
+            <div>
+              <h3 class="text-base font-bold text-slate-900">Member Register & Ledgers</h3>
+              <p class="text-xs text-slate-500">24 Registered Members • Active Cycle March 2026</p>
+            </div>
+
+            <!-- Search & Filter Controls -->
+            <div class="flex items-center space-x-2 w-full sm:w-auto">
+              <!-- Search Input -->
+              <div class="relative flex-1 sm:w-64">
+                <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-slate-400 text-xs"></i>
+                <input type="text" id="memberSearchInput" onkeyup="filterMembers()" placeholder="Search name or phone..." class="w-full pl-8 pr-3 py-1.5 bg-white/80 border border-slate-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-brand-500/30 focus:border-brand-500 transition-all shadow-2xs">
+              </div>
+              
+              <!-- Filter Select -->
+              <select id="statusFilter" onchange="filterMembers()" class="bg-white/80 border border-slate-200 text-slate-700 text-xs rounded-xl py-1.5 px-3 focus:outline-none focus:ring-2 focus:ring-brand-500/30 focus:border-brand-500 shadow-2xs font-medium">
+                <option value="ALL">All Status</option>
+                <option value="PAID">Paid</option>
+                <option value="PENDING">Pending</option>
+                <option value="LOAN">Active Loan</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Members Table Container -->
+          <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse" id="membersTable">
+              <thead>
+                <tr class="bg-slate-100/60 border-b border-slate-200 text-3xs font-extrabold text-slate-500 uppercase tracking-wider">
+                  <th class="py-3.5 px-4">Member Name</th>
+                  <th class="py-3.5 px-4">Phone Number</th>
+                  <th class="py-3.5 px-4 text-right">Total Savings</th>
+                  <th class="py-3.5 px-4 text-center">March Status</th>
+                  <th class="py-3.5 px-4 text-center">Loan Balance</th>
+                  <th class="py-3.5 px-4 text-center">Actions</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-200/60 text-xs text-slate-700">
+                
+                <!-- Member Row 1 -->
+                <tr class="member-row" data-name="Grace Wanjiku" data-phone="0712345678" data-status="PAID" data-loan="NO">
+                  <td class="py-3.5 px-4 font-bold text-slate-900 flex items-center space-x-2.5">
+                    <div class="w-8 h-8 rounded-full bg-emerald-100 text-emerald-800 text-xs font-bold flex items-center justify-center shadow-2xs border border-emerald-200">GW</div>
+                    <span>Grace Wanjiku</span>
+                  </td>
+                  <td class="py-3.5 px-4 font-mono text-slate-500 font-medium">0712 *** 678</td>
+                  <td class="py-3.5 px-4 text-right font-bold text-slate-900">KES 42,000</td>
+                  <td class="py-3.5 px-4 text-center">
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-3xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-200 shadow-2xs">
+                      <i class="fa-solid fa-circle-check mr-1 text-emerald-600"></i> Paid
+                    </span>
+                  </td>
+                  <td class="py-3.5 px-4 text-center text-slate-400 font-medium">-</td>
+                  <td class="py-3.5 px-4 text-center">
+                    <button onclick="quickPay('Grace Wanjiku')" class="px-2.5 py-1 bg-brand-50 hover:bg-brand-100 text-brand-700 border border-brand-200/60 rounded-lg text-xs font-bold transition-all active:scale-95">
+                      + Pay
+                    </button>
+                  </td>
+                </tr>
+
+                <!-- Member Row 2 -->
+                <tr class="member-row" data-name="David Omondi" data-phone="0722987654" data-status="PAID" data-loan="YES">
+                  <td class="py-3.5 px-4 font-bold text-slate-900 flex items-center space-x-2.5">
+                    <div class="w-8 h-8 rounded-full bg-blue-100 text-blue-800 text-xs font-bold flex items-center justify-center shadow-2xs border border-blue-200">DO</div>
+                    <span>David Omondi</span>
+                  </td>
+                  <td class="py-3.5 px-4 font-mono text-slate-500 font-medium">0722 *** 654</td>
+                  <td class="py-3.5 px-4 text-right font-bold text-slate-900">KES 65,500</td>
+                  <td class="py-3.5 px-4 text-center">
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-3xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-200 shadow-2xs">
+                      <i class="fa-solid fa-circle-check mr-1 text-emerald-600"></i> Paid
+                    </span>
+                  </td>
+                  <td class="py-3.5 px-4 text-center font-bold text-blue-600">KES 25,000</td>
+                  <td class="py-3.5 px-4 text-center">
+                    <button onclick="quickPay('David Omondi')" class="px-2.5 py-1 bg-brand-50 hover:bg-brand-100 text-brand-700 border border-brand-200/60 rounded-lg text-xs font-bold transition-all active:scale-95">
+                      + Pay
+                    </button>
+                  </td>
+                </tr>
+
+                <!-- Member Row 3 -->
+                <tr class="member-row" data-name="Sarah Hassan" data-phone="0733112233" data-status="PENDING" data-loan="NO">
+                  <td class="py-3.5 px-4 font-bold text-slate-900 flex items-center space-x-2.5">
+                    <div class="w-8 h-8 rounded-full bg-amber-100 text-amber-800 text-xs font-bold flex items-center justify-center shadow-2xs border border-amber-200">SH</div>
+                    <span>Sarah Hassan</span>
+                  </td>
+                  <td class="py-3.5 px-4 font-mono text-slate-500 font-medium">0733 *** 233</td>
+                  <td class="py-3.5 px-4 text-right font-bold text-slate-900">KES 18,000</td>
+                  <td class="py-3.5 px-4 text-center">
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-3xs font-bold bg-amber-100 text-amber-800 border border-amber-200 shadow-2xs">
+                      <i class="fa-solid fa-clock mr-1 text-amber-600"></i> Pending
+                    </span>
+                  </td>
+                  <td class="py-3.5 px-4 text-center text-slate-400 font-medium">-</td>
+                  <td class="py-3.5 px-4 text-center">
+                    <button onclick="quickPay('Sarah Hassan')" class="px-2.5 py-1 bg-brand-50 hover:bg-brand-100 text-brand-700 border border-brand-200/60 rounded-lg text-xs font-bold transition-all active:scale-95">
+                      + Pay
+                    </button>
+                  </td>
+                </tr>
+
+                <!-- Member Row 4 -->
+                <tr class="member-row" data-name="Joseph Mwangi" data-phone="0711554433" data-status="PAID" data-loan="YES">
+                  <td class="py-3.5 px-4 font-bold text-slate-900 flex items-center space-x-2.5">
+                    <div class="w-8 h-8 rounded-full bg-purple-100 text-purple-800 text-xs font-bold flex items-center justify-center shadow-2xs border border-purple-200">JM</div>
+                    <span>Joseph Mwangi</span>
+                  </td>
+                  <td class="py-3.5 px-4 font-mono text-slate-500 font-medium">0711 *** 433</td>
+                  <td class="py-3.5 px-4 text-right font-bold text-slate-900">KES 82,000</td>
+                  <td class="py-3.5 px-4 text-center">
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-3xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-200 shadow-2xs">
+                      <i class="fa-solid fa-circle-check mr-1 text-emerald-600"></i> Paid
+                    </span>
+                  </td>
+                  <td class="py-3.5 px-4 text-center font-bold text-blue-600">KES 40,000</td>
+                  <td class="py-3.5 px-4 text-center">
+                    <button onclick="quickPay('Joseph Mwangi')" class="px-2.5 py-1 bg-brand-50 hover:bg-brand-100 text-brand-700 border border-brand-200/60 rounded-lg text-xs font-bold transition-all active:scale-95">
+                      + Pay
+                    </button>
+                  </td>
+                </tr>
+
+                <!-- Member Row 5 -->
+                <tr class="member-row" data-name="Amina Abdi" data-phone="0700889900" data-status="PENDING" data-loan="NO">
+                  <td class="py-3.5 px-4 font-bold text-slate-900 flex items-center space-x-2.5">
+                    <div class="w-8 h-8 rounded-full bg-rose-100 text-rose-800 text-xs font-bold flex items-center justify-center shadow-2xs border border-rose-200">AA</div>
+                    <span>Amina Abdi</span>
+                  </td>
+                  <td class="py-3.5 px-4 font-mono text-slate-500 font-medium">0700 *** 900</td>
+                  <td class="py-3.5 px-4 text-right font-bold text-slate-900">KES 29,500</td>
+                  <td class="py-3.5 px-4 text-center">
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-3xs font-bold bg-amber-100 text-amber-800 border border-amber-200 shadow-2xs">
+                      <i class="fa-solid fa-clock mr-1 text-amber-600"></i> Pending
+                    </span>
+                  </td>
+                  <td class="py-3.5 px-4 text-center text-slate-400 font-medium">-</td>
+                  <td class="py-3.5 px-4 text-center">
+                    <button onclick="quickPay('Amina Abdi')" class="px-2.5 py-1 bg-brand-50 hover:bg-brand-100 text-brand-700 border border-brand-200/60 rounded-lg text-xs font-bold transition-all active:scale-95">
+                      + Pay
+                    </button>
+                  </td>
+                </tr>
+
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Table Footer Pagination/Summary -->
+          <div class="p-3 bg-slate-50/80 border-t border-slate-200/60 flex items-center justify-between text-xs text-slate-500 font-medium">
+            <span>Showing <strong class="text-slate-800">5</strong> of 24 members</span>
+            <div class="flex space-x-1.5">
+              <button class="px-3 py-1 bg-white border border-slate-200 rounded-lg hover:bg-slate-100 text-slate-700 font-bold transition-all shadow-2xs">Prev</button>
+              <button class="px-3 py-1 bg-white border border-slate-200 rounded-lg hover:bg-slate-100 text-slate-700 font-bold transition-all shadow-2xs">Next</button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Right Column: Recent Activity Feed & Agenda Notes -->
+      <div class="lg:col-span-4 space-y-6">
+        
+        <!-- Live Payment Feed Widget -->
+        <div class="glass-panel rounded-2xl border border-white/80 shadow-sm p-4 sm:p-5">
+          <div class="flex items-center justify-between mb-4 pb-3 border-b border-slate-200/70">
+            <div>
+              <h3 class="text-sm font-bold text-slate-900">Recent Payment Activity</h3>
+              <p class="text-3xs text-slate-500 font-medium">Live transaction audit log</p>
+            </div>
+            <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping"></span>
+          </div>
+
+          <div class="space-y-3.5" id="activityFeed">
+            
+            <!-- Log Entry 1 -->
+            <div class="flex items-start space-x-3 text-xs">
+              <div class="w-8 h-8 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0 mt-0.5 shadow-2xs">
+                <i class="fa-solid fa-mobile-screen"></i>
+              </div>
+              <div class="flex-1 min-w-0">
+                <p class="font-bold text-slate-900 truncate">David Omondi</p>
+                <p class="text-3xs text-slate-500 font-medium">M-PESA (QHK98213) • Monthly Share</p>
+                <p class="text-3xs text-slate-400">Today, 2:14 PM</p>
+              </div>
+              <div class="text-right">
+                <span class="font-bold text-emerald-600">+ KES 5,000</span>
+              </div>
+            </div>
+
+            <!-- Log Entry 2 -->
+            <div class="flex items-start space-x-3 text-xs">
+              <div class="w-8 h-8 rounded-xl bg-blue-100 text-blue-700 flex items-center justify-center shrink-0 mt-0.5 shadow-2xs">
+                <i class="fa-solid fa-money-bill-wave"></i>
+              </div>
+              <div class="flex-1 min-w-0">
+                <p class="font-bold text-slate-900 truncate">Grace Wanjiku</p>
+                <p class="text-3xs text-slate-500 font-medium">Cash Payment • Monthly Share</p>
+                <p class="text-3xs text-slate-400">Today, 11:30 AM</p>
+              </div>
+              <div class="text-right">
+                <span class="font-bold text-emerald-600">+ KES 5,000</span>
+              </div>
+            </div>
+
+            <!-- Log Entry 3 -->
+            <div class="flex items-start space-x-3 text-xs">
+              <div class="w-8 h-8 rounded-xl bg-purple-100 text-purple-700 flex items-center justify-center shrink-0 mt-0.5 shadow-2xs">
+                <i class="fa-solid fa-rotate-left"></i>
+              </div>
+              <div class="flex-1 min-w-0">
+                <p class="font-bold text-slate-900 truncate">Joseph Mwangi</p>
+                <p class="text-3xs text-slate-500 font-medium">M-PESA (QHK71092) • Loan Principal</p>
+                <p class="text-3xs text-slate-400">Yesterday, 4:45 PM</p>
+              </div>
+              <div class="text-right">
+                <span class="font-bold text-blue-600">+ KES 10,000</span>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Agenda Notes Widget -->
+        <div class="glass-panel rounded-2xl border border-white/80 shadow-sm p-4 sm:p-5">
+          <div class="flex items-center justify-between mb-3">
+            <h3 class="text-sm font-bold text-slate-900">Keyholder Notes & Agenda</h3>
+            <span class="text-3xs bg-slate-100 text-slate-600 px-2.5 py-0.5 rounded-full font-mono font-semibold border border-slate-200">Auto-saved</span>
+          </div>
+          <textarea rows="4" placeholder="Type quick notes for next meeting (e.g., discuss land investment, check late fee waivers)..." class="w-full p-3 bg-white/70 border border-slate-200/80 rounded-xl text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-brand-500/30 focus:border-brand-500 resize-none transition-all shadow-2xs"></textarea>
+          <div class="mt-2.5 flex justify-end">
+            <button onclick="showToast('Notes saved successfully')" class="px-4 py-1.5 bg-slate-900 text-white rounded-xl text-xs font-bold hover:bg-slate-800 transition-all shadow-md shadow-slate-900/10 active:scale-95">
+              Save Agenda
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+  </main>
+
+  <footer class="bg-white/70 backdrop-blur-md border-t border-slate-200/80 mt-auto py-4">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 font-medium gap-2">
+      <p>© 2026 Unity Community Society. Built for local Chama Keyholders.</p>
+      <div class="flex space-x-4">
+        <a href="#" class="hover:text-slate-800 transition-colors">Privacy Policy</a>
+        <a href="#" class="hover:text-slate-800 transition-colors">Support Line</a>
+        <a href="#" class="hover:text-slate-800 transition-colors">Export PDF Report</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- MODAL 1: Record Payment Modal -->
+  <div id="recordPaymentModal" class="fixed inset-0 z-50 hidden bg-slate-900/60 backdrop-blur-md modal-backdrop flex items-center justify-center p-4">
+    <div class="bg-white/95 rounded-2xl max-w-md w-full shadow-2xl border border-white/80 overflow-hidden modal-box">
+      <div class="p-4 bg-slate-900 text-white flex items-center justify-between">
+        <div class="flex items-center space-x-2">
+          <i class="fa-solid fa-cash-register text-emerald-400"></i>
+          <h3 class="font-bold text-sm">Record Member Payment</h3>
+        </div>
+        <button onclick="closeModal('recordPaymentModal')" class="text-slate-400 hover:text-white text-xl leading-none">&times;</button>
+      </div>
+
+      <form onsubmit="handlePaymentSubmit(event)" class="p-5 space-y-4">
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">Select Member</label>
+          <select id="paymentMemberSelect" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-xs text-slate-800 font-semibold focus:ring-2 focus:ring-brand-500">
+            <option value="Grace Wanjiku">Grace Wanjiku (0712 *** 678)</option>
+            <option value="David Omondi">David Omondi (0722 *** 654)</option>
+            <option value="Sarah Hassan">Sarah Hassan (0733 *** 233)</option>
+            <option value="Joseph Mwangi">Joseph Mwangi (0711 *** 433)</option>
+            <option value="Amina Abdi">Amina Abdi (0700 *** 900)</option>
+          </select>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Payment Type</label>
+            <select class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-xs text-slate-800 font-medium">
+              <option>Monthly Contribution</option>
+              <option>Loan Repayment</option>
+              <option>Late Penalty Fine</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Amount (KES)</label>
+            <input type="number" id="paymentAmount" value="5000" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-xs font-black text-slate-900">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Payment Method</label>
+            <select class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-xs text-slate-800 font-medium">
+              <option>M-PESA</option>
+              <option>Cash Handover</option>
+              <option>Bank Deposit</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Reference Code</label>
+            <input type="text" placeholder="e.g. QHK8912" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-xs text-slate-800 font-medium">
+          </div>
+        </div>
+
+        <div class="flex items-center space-x-2 pt-2">
+          <input type="checkbox" id="smsReceiptToggle" checked class="rounded text-brand-600 focus:ring-brand-500">
+          <label for="smsReceiptToggle" class="text-xs text-slate-600 font-medium">Auto-send instant SMS receipt to member</label>
+        </div>
+
+        <div class="flex space-x-2 pt-3 border-t border-slate-100">
+          <button type="button" onclick="closeModal('recordPaymentModal')" class="flex-1 py-2.5 bg-slate-100 text-slate-700 rounded-xl text-xs font-bold hover:bg-slate-200 transition-colors">Cancel</button>
+          <button type="submit" class="flex-1 py-2.5 gradient-btn-brand text-white rounded-xl text-xs font-bold shadow-md">Save & Send Receipt</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL 2: Send Group SMS Modal -->
+  <div id="sendSmsModal" class="fixed inset-0 z-50 hidden bg-slate-900/60 backdrop-blur-md modal-backdrop flex items-center justify-center p-4">
+    <div class="bg-white/95 rounded-2xl max-w-md w-full shadow-2xl border border-white/80 overflow-hidden modal-box">
+      <div class="p-4 bg-slate-900 text-white flex items-center justify-between">
+        <div class="flex items-center space-x-2">
+          <i class="fa-solid fa-paper-plane text-amber-400"></i>
+          <h3 class="font-bold text-sm">Send Broadcast SMS</h3>
+        </div>
+        <button onclick="closeModal('sendSmsModal')" class="text-slate-400 hover:text-white text-xl leading-none">&times;</button>
+      </div>
+
+      <form onsubmit="handleSmsSubmit(event)" class="p-5 space-y-4">
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">Target Recipients</label>
+          <select class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-xs text-slate-800 font-semibold">
+            <option>All Group Members (24)</option>
+            <option>Members with Pending Payments (3)</option>
+            <option>Members with Active Loans (6)</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">Message Content</label>
+          <textarea id="smsContent" rows="4" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs text-slate-800 focus:ring-2 focus:ring-brand-500 font-medium">Jambo Unity Chama members, reminder that our monthly meeting is this Saturday at 2:00 PM in St. Peter's Hall. Please settle pending shares.</textarea>
+        </div>
+
+        <div class="flex space-x-2 pt-2 border-t border-slate-100">
+          <button type="button" onclick="closeModal('sendSmsModal')" class="flex-1 py-2.5 bg-slate-100 text-slate-700 rounded-xl text-xs font-bold hover:bg-slate-200 transition-colors">Cancel</button>
+          <button type="submit" class="flex-1 py-2.5 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-bold shadow-md transition-colors">Send SMS Now</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL 3: Take Attendance Modal -->
+  <div id="takeAttendanceModal" class="fixed inset-0 z-50 hidden bg-slate-900/60 backdrop-blur-md modal-backdrop flex items-center justify-center p-4">
+    <div class="bg-white/95 rounded-2xl max-w-md w-full shadow-2xl border border-white/80 overflow-hidden modal-box">
+      <div class="p-4 bg-slate-900 text-white flex items-center justify-between">
+        <div class="flex items-center space-x-2">
+          <i class="fa-solid fa-clipboard-user text-blue-400"></i>
+          <h3 class="font-bold text-sm">Meeting Roll Call Checklist</h3>
+        </div>
+        <button onclick="closeModal('takeAttendanceModal')" class="text-slate-400 hover:text-white text-xl leading-none">&times;</button>
+      </div>
+
+      <div class="p-5 space-y-3 max-h-80 overflow-y-auto">
+        <p class="text-xs text-slate-500 mb-2 font-medium">Mark member attendance for meeting on Sat, March 28</p>
+        
+        <div class="flex items-center justify-between p-2.5 bg-slate-50 rounded-xl text-xs border border-slate-100">
+          <span class="font-bold text-slate-800">Grace Wanjiku</span>
+          <div class="flex space-x-1">
+            <button class="px-2.5 py-1 bg-emerald-600 text-white rounded-lg text-3xs font-extrabold shadow-2xs">Present</button>
+            <button class="px-2.5 py-1 bg-slate-200 text-slate-600 rounded-lg text-3xs font-bold">Absent</button>
+          </div>
+        </div>
+
+        <div class="flex items-center justify-between p-2.5 bg-slate-50 rounded-xl text-xs border border-slate-100">
+          <span class="font-bold text-slate-800">David Omondi</span>
+          <div class="flex space-x-1">
+            <button class="px-2.5 py-1 bg-emerald-600 text-white rounded-lg text-3xs font-extrabold shadow-2xs">Present</button>
+            <button class="px-2.5 py-1 bg-slate-200 text-slate-600 rounded-lg text-3xs font-bold">Absent</button>
+          </div>
+        </div>
+
+        <div class="flex items-center justify-between p-2.5 bg-slate-50 rounded-xl text-xs border border-slate-100">
+          <span class="font-bold text-slate-800">Sarah Hassan</span>
+          <div class="flex space-x-1">
+            <button class="px-2.5 py-1 bg-slate-200 text-slate-600 rounded-lg text-3xs font-bold">Present</button>
+            <button class="px-2.5 py-1 bg-rose-600 text-white rounded-lg text-3xs font-extrabold shadow-2xs">Absent</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="p-4 bg-slate-50 border-t border-slate-100 flex justify-end">
+        <button onclick="closeModal('takeAttendanceModal'); showToast('Attendance register saved');" class="px-4 py-2 bg-slate-900 text-white text-xs font-bold rounded-xl hover:bg-slate-800 transition-all shadow-md active:scale-95">
+          Save Register
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Bar -->
+  <div id="toast" class="fixed bottom-5 right-5 z-50 hidden glass-header text-slate-900 text-xs font-bold px-4 py-3 rounded-2xl shadow-xl border border-slate-200/80 flex items-center space-x-2.5 transition-all">
+    <i class="fa-solid fa-circle-check text-emerald-500 text-base"></i>
+    <span id="toastMsg">Notification message</span>
+  </div>
+
+  <script>
+    // Modal Management Functions
+    function openModal(modalId) {
+      document.getElementById(modalId).classList.remove('hidden');
+    }
+
+    function closeModal(modalId) {
+      document.getElementById(modalId).classList.add('hidden');
+    }
+
+    // Quick Payment Trigger for Specific Member
+    function quickPay(memberName) {
+      const select = document.getElementById('paymentMemberSelect');
+      for (let i = 0; i < select.options.length; i++) {
+        if (select.options[i].value.includes(memberName)) {
+          select.selectedIndex = i;
+          break;
+        }
+      }
+      openModal('recordPaymentModal');
+    }
+
+    // Filter Member Search and Dropdown
+    function filterMembers() {
+      const searchVal = document.getElementById('memberSearchInput').value.toLowerCase();
+      const statusVal = document.getElementById('statusFilter').value;
+      const rows = document.querySelectorAll('.member-row');
+
+      rows.forEach(row => {
+        const name = row.getAttribute('data-name').toLowerCase();
+        const phone = row.getAttribute('data-phone').toLowerCase();
+        const status = row.getAttribute('data-status');
+        const hasLoan = row.getAttribute('data-loan');
+
+        const matchesSearch = name.includes(searchVal) || phone.includes(searchVal);
+        
+        let matchesStatus = true;
+        if (statusVal === 'PAID') matchesStatus = (status === 'PAID');
+        if (statusVal === 'PENDING') matchesStatus = (status === 'PENDING');
+        if (statusVal === 'LOAN') matchesStatus = (hasLoan === 'YES');
+
+        if (matchesSearch && matchesStatus) {
+          row.style.display = '';
+        } else {
+          row.style.display = 'none';
+        }
+      });
+    }
+
+    // Form Submission Handlers
+    function handlePaymentSubmit(event) {
+      event.preventDefault();
+      const member = document.getElementById('paymentMemberSelect').value;
+      const amount = document.getElementById('paymentAmount').value;
+      
+      closeModal('recordPaymentModal');
+      showToast(`Logged KES ${amount} for ${member}. SMS Receipt Sent!`);
+
+      // Dynamically add payment log to feed with entry animation
+      const feed = document.getElementById('activityFeed');
+      const newLog = document.createElement('div');
+      newLog.className = 'flex items-start space-x-3 text-xs animate-fade-in';
+      newLog.innerHTML = `
+        <div class="w-8 h-8 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0 mt-0.5 shadow-2xs border border-emerald-200">
+          <i class="fa-solid fa-check"></i>
+        </div>
+        <div class="flex-1 min-w-0">
+          <p class="font-bold text-slate-900 truncate">${member}</p>
+          <p class="text-3xs text-slate-500 font-medium">Manual Entry • Monthly Share</p>
+          <p class="text-3xs text-slate-400">Just now</p>
+        </div>
+        <div class="text-right">
+          <span class="font-bold text-emerald-600">+ KES ${amount}</span>
+        </div>
+      `;
+      feed.prepend(newLog);
+    }
+
+    function handleSmsSubmit(event) {
+      event.preventDefault();
+      closeModal('sendSmsModal');
+      showToast('Group SMS broadcast sent successfully!');
+    }
+
+    // Toast Notification helper
+    function showToast(message) {
+      const toast = document.getElementById('toast');
+      const toastMsg = document.getElementById('toastMsg');
+      toastMsg.textContent = message;
+      toast.classList.remove('hidden');
+      setTimeout(() => {
+        toast.classList.add('hidden');
+      }, 3000);
+    }
+  </script>
+</body>
+</html>
